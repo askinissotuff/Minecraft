@@ -45,6 +45,13 @@ wss.on('connection',ws=>{
     if(m.type==='list'){send(ws,{type:'rooms',rooms:[...rooms.values()].map(r=>({code:r.code,name:r.name,players:r.players.size,maxPlayers:MAX_PLAYERS}))});return}
     if(!ws.room)return;
     const room=ws.room,player=room.players.get(ws.playerId);if(!player)return;
+    if(m.type==='block'){
+      const x=Math.round(Number(m.x)),y=Math.round(Number(m.y)),z=Math.round(Number(m.z));
+      const allowed=new Set(['grass','dirt','stone','sand','wood','leaves','water','bedrock','planks','coal']);
+      if(![x,y,z].every(Number.isFinite)||Math.abs(x)>10000||Math.abs(y)>256||Math.abs(z)>10000)return;
+      const block=allowed.has(m.block)?m.block:null;
+      broadcast(room,{type:'block',x,y,z,block,by:player.id});return;
+    }
     if(m.type==='move'){
       const n=v=>Number.isFinite(Number(v))?Math.max(-10000,Math.min(10000,Number(v))):0;
       player.x=n(m.x);player.y=n(m.y);player.z=n(m.z);player.yaw=n(m.yaw);player.pitch=Math.max(-1.5,Math.min(1.5,n(m.pitch)));
