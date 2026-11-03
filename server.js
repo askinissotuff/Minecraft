@@ -47,7 +47,7 @@ wss.on('connection',ws=>{
     const room=ws.room,player=room.players.get(ws.playerId);if(!player)return;
     if(m.type==='block'){
       const x=Math.round(Number(m.x)),y=Math.round(Number(m.y)),z=Math.round(Number(m.z));
-      const allowed=new Set(['grass','dirt','stone','sand','wood','leaves','water','bedrock','planks','coal']);
+      const allowed=new Set(['grass','dirt','stone','sand','wood','leaves','water','bedrock','planks','coal','iron']);
       if(![x,y,z].every(Number.isFinite)||Math.abs(x)>10000||Math.abs(y)>256||Math.abs(z)>10000)return;
       const block=allowed.has(m.block)?m.block:null;
       const id=x+','+y+','+z;if(block){if(room.world.size<30000||room.world.has(id))room.world.set(id,block)}else room.world.delete(id);broadcast(room,{type:'block',x,y,z,block,by:player.id});return;
