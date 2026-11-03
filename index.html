@@ -45,6 +45,28 @@ document.querySelectorAll('[data-move]').forEach(b=>{const k=b.dataset.move,code
 function jump(){if(player.onGround){player.vel.y=8;player.onGround=false}}document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});
 document.getElementById('play').addEventListener('click',()=>{document.getElementById('start').style.display='none';if(innerWidth>700)renderer.domElement.requestPointerLock()});
 function groundHeight(x,z){const h=heightMap.get(key(Math.round(x),Math.round(z)));return (h===undefined?2:h)+.5;}
+
+// PROMPT 2: mining, block drops, building inventory, and a living sky.
+const inventory={grass:0,dirt:0,stone:0,sand:0,wood:0,leaves:0,water:0};
+const blockNames=['grass','dirt','stone','sand','wood','leaves','water','stone','grass'];
+const inventoryPanel=document.createElement('div');
+inventoryPanel.style.cssText='position:fixed;left:50%;bottom:88px;transform:translateX(-50%);color:white;background:#101820bb;border:1px solid #ffffff66;border-radius:8px;padding:6px 12px;font:12px system-ui;z-index:4;text-shadow:0 1px 3px #000;pointer-events:none;white-space:nowrap';
+inventoryPanel.textContent='Inventory: break blocks to collect them';
+document.body.appendChild(inventoryPanel);
+function refreshInventory(){inventoryPanel.textContent='Blocks: '+blockNames.slice(0,7).map(t=>t+': '+inventory[t]).join('  ·  ');[...hotbar.children].forEach((el,i)=>{let old=el.querySelector('.count');if(old)old.remove();const n=document.createElement('small');n.className='count';n.style.cssText='position:absolute;top:1px;left:4px;font-size:10px;color:#fff';n.textContent=inventory[blockNames[i]]||0;el.appendChild(n)})}
+function rebuildType(type){const old=groups[type];if(old)scene.remove(old);const list=blocks.filter(b=>b.type===type);const mesh=new THREE.InstancedMesh(cube,mats[type],Math.max(1,list.length));const obj=new THREE.Object3D();list.forEach((b,i)=>{obj.position.set(b.x,b.y,b.z);obj.updateMatrix();mesh.setMatrixAt(i,obj.matrix)});mesh.instanceMatrix.needsUpdate=true;mesh.receiveShadow=true;mesh.castShadow=type!=='water';scene.add(mesh);groups[type]=mesh;}
+function blockRay(){const dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);const ray=new THREE.Raycaster(camera.position,dir,0,6);const hits=ray.intersectObjects(types.map(t=>groups[t]).filter(Boolean),false);if(!hits.length)return null;const hit=hits[0],type=types.find(t=>groups[t]===hit.object);if(!type||hit.instanceId===undefined)return null;const mat=new THREE.Matrix4();hit.object.getMatrixAt(hit.instanceId,mat);const p=new THREE.Vector3().setFromMatrixPosition(mat);return {hit,type,x:Math.round(p.x),y:Math.round(p.y),z:Math.round(p.z)}}
+function mineOrBuild(e){if(e.button!==0&&e.button!==2)return;if(innerWidth>700&&!locked)return;e.preventDefault();const b=blockRay();if(!b)return;
+if(e.button===0){if(b.y<=0)return;const i=blocks.findIndex(v=>v.x===b.x&&v.y===b.y&&v.z===b.z&&v.type===b.type);if(i<0)return;blocks.splice(i,1);inventory[b.type]=(inventory[b.type]||0)+1;rebuildType(b.type);refreshInventory();}
+else{const type=blockNames[selected];if(!inventory[type]){inventoryPanel.textContent='No '+type+' blocks — mine some first!';return;}const normal=b.hit.face.normal.clone().transformDirection(b.hit.object.matrixWorld);const x=b.x+Math.round(normal.x),y=b.y+Math.round(normal.y),z=b.z+Math.round(normal.z);if(y<0||blocks.some(v=>v.x===x&&v.y===y&&v.z===z))return;if(Math.abs(x-player.pos.x)<.8&&Math.abs(z-player.pos.z)<.8&&Math.abs(y-player.pos.y)<1.8)return;blocks.push({x,y,z,type});inventory[type]--;rebuildType(type);refreshInventory();}
+}
+renderer.domElement.addEventListener('mousedown',mineOrBuild);
+renderer.domElement.addEventListener('contextmenu',e=>e.preventDefault());
+renderer.domElement.addEventListener('touchend',e=>{if(e.changedTouches.length&&innerWidth<=700){const t=e.changedTouches[0];if(t.clientY<innerHeight-145){const b=blockRay();if(b){const i=blocks.findIndex(v=>v.x===b.x&&v.y===b.y&&v.z===b.z&&v.type===b.type);if(i>=0&&b.y>0){blocks.splice(i,1);inventory[b.type]++;rebuildType(b.type);refreshInventory()}}}}},{passive:true});
+refreshInventory();
+const skyStart=scene.background.clone();let skyClock=0;
+function updateSky(dt){skyClock+=dt*.018;const daylight=(Math.sin(skyClock)+1)/2;const color=new THREE.Color().lerpColors(new THREE.Color(0x101a38),new THREE.Color(0x87ceeb),Math.max(.08,daylight));scene.background.copy(color);scene.fog.color.copy(color);sun.intensity=.25+daylight*2;sunBall.position.set(Math.cos(skyClock)*35,Math.max(5,Math.sin(skyClock)*28),-25);sunBall.material.color.setHex(daylight>.3?0xfff0b0:0xcbdcff);sunBall.visible=daylight>.08;}
+
 let last=performance.now();function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;
 const forward=new THREE.Vector3(-Math.sin(player.yaw),0,-Math.cos(player.yaw)),right=new THREE.Vector3(Math.cos(player.yaw),0,-Math.sin(player.yaw));const move=new THREE.Vector3();if(keys.KeyW||keys.ArrowUp)move.add(forward);if(keys.KeyS||keys.ArrowDown)move.sub(forward);if(keys.KeyD||keys.ArrowRight)move.add(right);if(keys.KeyA||keys.ArrowLeft)move.sub(right);if(move.lengthSq())move.normalize().multiplyScalar(5.5*dt);
 const nx=player.pos.x+move.x,nz=player.pos.z+move.z;const edge=worldSize/2-1;if(Math.abs(nx)<edge&&player.pos.y-groundHeight(nx,player.pos.z)<2.3)player.pos.x=nx;if(Math.abs(nz)<edge&&player.pos.y-groundHeight(player.pos.x,nz)<2.3)player.pos.z=nz;
