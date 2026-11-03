@@ -36,7 +36,7 @@
 #invpanel h2{margin:2px 0 14px;font-size:19px;color:#333}#invgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .invslot{aspect-ratio:1;background:#777;border:2px solid #eee;box-shadow:inset 2px 2px #ffffff33,inset -2px -2px #0005;display:grid;place-items:center;gap:3px;padding:4px;color:white;text-shadow:1px 2px #222;border-radius:0;font-size:11px}
 .invslot .item-icon{width:30px;height:30px}.invslot small{font-size:10px;font-weight:700}
-#invclose{margin:14px 0 0;background:#687e4b}
+#craftlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:12px;max-height:30vh;overflow:auto}.craftrecipe{background:#777;color:#fff;border:2px solid #eee;padding:9px 5px;font-size:11px;font-weight:900;text-shadow:1px 1px #222}.craftrecipe:disabled{opacity:.4}#invclose{margin:14px 0 0;background:#687e4b}
 #toast{position:fixed;top:16%;left:50%;transform:translateX(-50%);background:#171717c9;color:#fff;padding:8px 13px;z-index:9;opacity:0;pointer-events:none;border:1px solid #ffffff55;font-size:13px}
 #breakmeter{position:absolute;left:50%;top:calc(50% + 22px);transform:translateX(-50%);width:48px;height:5px;background:#222;display:none}#breakfill{height:100%;width:0;background:#fff}
 @media(pointer:coarse),(max-width:800px){#mobile{display:block}#pause{display:block}#topline{right:54px}#gametitle{display:block;font-size:10px}#health{font-size:16px}}
@@ -46,5 +46,5 @@
 <div id="mobile"><div id="stick"><div id="nub"></div></div><div id="lookhint">DRAG TO LOOK</div><div id="touchbuttons"><button id="jump" aria-label="Jump">⬆</button><button id="sneak" aria-label="Sneak">⬇</button><button id="mine" aria-label="Mine">⛏</button><button id="place" aria-label="Place block">▣</button><button id="inventoryBtn" aria-label="Inventory">▦</button></div></div>
 <button id="pause" aria-label="Pause">Ⅱ</button>
 <div id="menu"><div id="panel"><div id="logo">BLOCKCRAFT</div><div id="subtitle">BUILD · EXPLORE · SURVIVE</div><button id="play">▶ &nbsp; PLAY</button><button id="mode">MODE: SURVIVAL</button><button id="reset">＋ &nbsp; CREATE NEW WORLD</button><p>Explore a world made of blocks.<br>Left stick to move · Drag to look · Tap to mine and build.</p></div></div>
-<div id="inventory"><div id="invpanel"><h2>Inventory</h2><div id="invgrid"></div><button id="invclose">BACK TO GAME</button></div></div><div id="toast"></div>
+<div id="inventory"><div id="invpanel"><h2>Inventory</h2><div id="invgrid"></div><h2 style="margin-top:16px">Crafting</h2><div id="craftlist"></div><button id="invclose">BACK TO GAME</button></div></div><div id="toast"></div>
 <script type="module" src="./game.js"></script></body></html>
