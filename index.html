@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Blockworld — Voxel Sandbox</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#83c9f4;font-family:system-ui,Arial,sans-serif}canvas{display:block}#overlay{position:fixed;inset:0;pointer-events:none;color:white;text-shadow:0 2px 4px #000;z-index:3}#brand{position:absolute;top:16px;left:18px;font-weight:900;font-size:18px;letter-spacing:1px}#help{position:absolute;top:50px;left:18px;font-size:12px;line-height:1.55;opacity:.9}#crosshair{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:25px;font-weight:300}#hotbar{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:5px;padding:7px;background:#1119;border:2px solid #ffffff70;border-radius:8px;pointer-events:auto}.slot{width:48px;height:48px;border:2px solid #ffffff55;background:#3339;border-radius:4px;display:grid;place-items:center;font-size:24px;position:relative}.slot.selected{border:3px solid white;background:#ffffff45;transform:translateY(-4px)}.slot small{position:absolute;bottom:1px;right:4px;font-size:9px}.block-icon{width:24px;height:24px;border:2px solid #0005;box-shadow:inset -5px -5px #0002,inset 4px 4px #fff2}#start{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(#17334c99,#091521bb);z-index:5;color:white;text-align:center}#panel{padding:28px 34px;background:#172333eF;border:2px solid #ffffff55;border-radius:14px;max-width:440px;margin:18px;box-shadow:0 15px 50px #0008}#panel h1{font-size:36px;margin:0 0 5px;text-shadow:3px 3px #416b2c}#panel p{color:#d7e5ef;line-height:1.5}button{border:0;border-radius:7px;background:#68a83c;color:white;font-weight:800;font-size:17px;padding:13px 25px;cursor:pointer;box-shadow:0 4px #355b20}button:active{transform:translateY(3px);box-shadow:0 1px #355b20}#status{position:absolute;right:16px;top:16px;font-size:12px;background:#1118;padding:6px 9px;border-radius:5px}#mobile{display:none;position:fixed;bottom:95px;left:14px;z-index:4;gap:7px;pointer-events:auto}#mobile button{width:48px;height:48px;padding:0;background:#172333aa;border:1px solid #fff8;box-shadow:none;touch-action:none}#jump{position:fixed;right:18px;bottom:110px;z-index:4;display:none;width:65px;height:65px;border-radius:50%;background:#172333aa;border:1px solid #fff8;box-shadow:none;touch-action:none}
+@media(max-width:700px){#help{font-size:10px;top:48px}#hotbar{bottom:10px;gap:3px;padding:5px}.slot{width:36px;height:39px;font-size:19px}#mobile{display:grid;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,48px)}#jump{display:block}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<div id="overlay"><div id="brand">▦ BLOCKWORLD</div><div id="help">WASD — Move · SPACE — Jump<br>Mouse — Look · 1–9 — Select block<br>ESC — Release mouse</div><div id="crosshair">+</div><div id="status">WORLD 01 · CREATIVE</div><div id="hotbar"></div></div>
+<div id="mobile"><button data-move="forward">▲</button><button data-move="back">▼</button><button data-move="left">◀</button><button data-move="right">▶</button></div><button id="jump">↑</button>
+<div id="start"><div id="panel"><h1>BLOCKWORLD</h1><div style="font-size:13px;letter-spacing:4px;color:#a9d98a">A VOXEL SANDBOX</div><p>Explore a little blocky world. Walk across grassy hills, look around, and get ready to build.</p><button id="play">PLAY WORLD</button><p style="font-size:11px;margin-bottom:0">Best on desktop · Click the game to capture your mouse</p></div></div>
+<script type="module">
+import * as THREE from 'three';
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x87ceeb);scene.fog=new THREE.Fog(0x87ceeb,24,65);
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,120);
+const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;document.body.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xd9efff,0x59633c,2.0));
+const sun=new THREE.DirectionalLight(0xfff2d2,2.2);sun.position.set(-25,40,20);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-35;sun.shadow.camera.right=35;sun.shadow.camera.top=35;sun.shadow.camera.bottom=-35;scene.add(sun);
+const mats={grass:new THREE.MeshLambertMaterial({color:0x63ad42}),dirt:new THREE.MeshLambertMaterial({color:0x8b5a35}),stone:new THREE.MeshLambertMaterial({color:0x85898d}),sand:new THREE.MeshLambertMaterial({color:0xd9c27c}),wood:new THREE.MeshLambertMaterial({color:0x916039}),leaves:new THREE.MeshLambertMaterial({color:0x397d35}),water:new THREE.MeshLambertMaterial({color:0x398bd0,transparent:true,opacity:.68})};
+const cube=new THREE.BoxGeometry(1,1,1),worldSize=34,blocks=[],heightMap=new Map();
+const key=(x,z)=>x+','+z;
+function heightAt(x,z){return Math.floor(3+Math.sin(x*.31)*1.5+Math.cos(z*.27)*1.25+Math.sin((x+z)*.17)*1.1)}
+for(let x=-worldSize/2;x<worldSize/2;x++)for(let z=-worldSize/2;z<worldSize/2;z++){let h=heightAt(x,z);heightMap.set(key(x,z),h);for(let y=0;y<=h;y++){let type=y===h?'grass':y>=h-2?'dirt':'stone';blocks.push({x,y,z,type})}if(h<3&&Math.sin(x*.2+z*.4)>.1)blocks.push({x,y:3,z,type:'water'});}
+function addTree(x,z){let h=heightMap.get(key(x,z));if(h<3)return;for(let y=1;y<=3;y++)blocks.push({x,y:h+y,z,type:'wood'});for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)for(let dy=2;dy<=4;dy++){if(Math.abs(dx)+Math.abs(dz)+(dy===4?1:0)<5&&!(dx===0&&dz===0&&dy<4))blocks.push({x:x+dx,y:h+dy,z:z+dz,type:'leaves'});}}
+for(let x=-14;x<=14;x+=6)for(let z=-14;z<=14;z+=7)if(Math.abs(x)>4||Math.abs(z)>4)addTree(x,z);
+const types=['grass','dirt','stone','sand','wood','leaves','water'];const groups={};
+for(const t of types){const list=blocks.filter(b=>b.type===t);const mesh=new THREE.InstancedMesh(cube,mats[t],Math.max(1,list.length));const o=new THREE.Object3D();list.forEach((b,i)=>{o.position.set(b.x,b.y,b.z);o.updateMatrix();mesh.setMatrixAt(i,o.matrix)});mesh.instanceMatrix.needsUpdate=true;mesh.receiveShadow=true;mesh.castShadow=t!=='water';scene.add(mesh);groups[t]=mesh;}
+const sunBall=new THREE.Mesh(new THREE.SphereGeometry(2.5,16,12),new THREE.MeshBasicMaterial({color:0xfff2b0}));sunBall.position.set(-22,24,-35);scene.add(sunBall);
+const player={pos:new THREE.Vector3(0,heightAt(0,0)+2.15,0),vel:new THREE.Vector3(),yaw:0,pitch:0,onGround:false};camera.position.copy(player.pos);
+const keys={};let locked=false,selected=0;const hotbar=document.getElementById('hotbar');
+const icons=['🟩','🟫','⬜','🟨','🪵','🌿','🟦','🪨','🟩'];const colors=['#63ad42','#8b5a35','#85898d','#d9c27c','#916039','#397d35','#398bd0','#aaa','#63ad42'];
+icons.forEach((ic,i)=>{const el=document.createElement('div');el.className='slot'+(i===0?' selected':'');el.innerHTML=ic+'<small>'+(i+1)+'</small>';el.addEventListener('click',()=>select(i));hotbar.appendChild(el)});
+function select(i){selected=(i+9)%9;[...hotbar.children].forEach((e,n)=>e.classList.toggle('selected',n===selected));}
+document.addEventListener('keydown',e=>{keys[e.code]=true;if(e.code.startsWith('Digit')){let n=Number(e.code.slice(5));if(n>=1&&n<=9)select(n-1)}if(e.code==='Space')e.preventDefault()});
+document.addEventListener('keyup',e=>keys[e.code]=false);
+renderer.domElement.addEventListener('click',()=>{if(!locked&&innerWidth>700)renderer.domElement.requestPointerLock()});
+document.addEventListener('pointerlockchange',()=>{locked=document.pointerLockElement===renderer.domElement;document.getElementById('start').style.display=locked?'none':'grid'});
+document.addEventListener('mousemove',e=>{if(!locked)return;player.yaw-=e.movementX*.0022;player.pitch-=e.movementY*.0022;player.pitch=Math.max(-1.52,Math.min(1.52,player.pitch));});
+let touchLook=null;renderer.domElement.addEventListener('touchstart',e=>{if(e.touches.length){touchLook={x:e.touches[0].clientX,y:e.touches[0].clientY}}},{passive:true});renderer.domElement.addEventListener('touchmove',e=>{if(!touchLook||!e.touches.length)return;const t=e.touches[0],dx=t.clientX-touchLook.x,dy=t.clientY-touchLook.y;player.yaw-=dx*.006;player.pitch=Math.max(-1.5,Math.min(1.5,player.pitch-dy*.006));touchLook={x:t.clientX,y:t.clientY}},{passive:true});renderer.domElement.addEventListener('touchend',()=>touchLook=null);
+document.querySelectorAll('[data-move]').forEach(b=>{const k=b.dataset.move,code={forward:'KeyW',back:'KeyS',left:'KeyA',right:'KeyD'}[k];b.addEventListener('pointerdown',e=>{e.preventDefault();keys[code]=true});['pointerup','pointercancel','pointerleave'].forEach(ev=>b.addEventListener(ev,()=>keys[code]=false));});
+function jump(){if(player.onGround){player.vel.y=8;player.onGround=false}}document.getElementById('jump').addEventListener('pointerdown',e=>{e.preventDefault();jump()});
+document.getElementById('play').addEventListener('click',()=>{document.getElementById('start').style.display='none';if(innerWidth>700)renderer.domElement.requestPointerLock()});
+function groundHeight(x,z){const h=heightMap.get(key(Math.round(x),Math.round(z)));return (h===undefined?2:h)+.5;}
+let last=performance.now();function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;
+const forward=new THREE.Vector3(-Math.sin(player.yaw),0,-Math.cos(player.yaw)),right=new THREE.Vector3(Math.cos(player.yaw),0,-Math.sin(player.yaw));const move=new THREE.Vector3();if(keys.KeyW||keys.ArrowUp)move.add(forward);if(keys.KeyS||keys.ArrowDown)move.sub(forward);if(keys.KeyD||keys.ArrowRight)move.add(right);if(keys.KeyA||keys.ArrowLeft)move.sub(right);if(move.lengthSq())move.normalize().multiplyScalar(5.5*dt);
+const nx=player.pos.x+move.x,nz=player.pos.z+move.z;const edge=worldSize/2-1;if(Math.abs(nx)<edge&&player.pos.y-groundHeight(nx,player.pos.z)<2.3)player.pos.x=nx;if(Math.abs(nz)<edge&&player.pos.y-groundHeight(player.pos.x,nz)<2.3)player.pos.z=nz;
+if(keys.Space&&!player.wasSpace)jump();player.wasSpace=!!keys.Space;
+player.vel.y-=22*dt;player.pos.y+=player.vel.y*dt;const floor=groundHeight(player.pos.x,player.pos.z)+1.15;if(player.pos.y<floor){player.pos.y=floor;player.vel.y=0;player.onGround=true}else player.onGround=false;
+if(player.pos.y< -5){player.pos.set(0,heightAt(0,0)+2.15,0);player.vel.set(0,0,0)}
+camera.position.copy(player.pos);camera.rotation.order='YXZ';camera.rotation.y=player.yaw;camera.rotation.x=player.pitch;renderer.render(scene,camera);}
+requestAnimationFrame(animate);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+</script></body></html>
