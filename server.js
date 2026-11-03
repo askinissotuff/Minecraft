@@ -33,7 +33,7 @@ wss.on('connection',ws=>{
       if(ws.room)remove(ws);
       if(rooms.size>=MAX_ROOMS){send(ws,{type:'error',message:'Lobby capacity reached. Try again later.'});return}
       let id;do{id=code()}while(rooms.has(id));
-      const room={code:id,name:clean(m.name,28),players:new Map(),created:Date.now()};
+      const room={code:id,name:clean(m.name,28),players:new Map(),world:new Map(),created:Date.now()};
       rooms.set(id,room);join(ws,room,m.name);return;
     }
     if(m.type==='join'){
@@ -50,7 +50,7 @@ wss.on('connection',ws=>{
       const allowed=new Set(['grass','dirt','stone','sand','wood','leaves','water','bedrock','planks','coal']);
       if(![x,y,z].every(Number.isFinite)||Math.abs(x)>10000||Math.abs(y)>256||Math.abs(z)>10000)return;
       const block=allowed.has(m.block)?m.block:null;
-      broadcast(room,{type:'block',x,y,z,block,by:player.id});return;
+      const id=x+','+y+','+z;if(block){if(room.world.size<30000||room.world.has(id))room.world.set(id,block)}else room.world.delete(id);broadcast(room,{type:'block',x,y,z,block,by:player.id});return;
     }
     if(m.type==='move'){
       const n=v=>Number.isFinite(Number(v))?Math.max(-10000,Math.min(10000,Number(v))):0;
@@ -69,7 +69,7 @@ wss.on('connection',ws=>{
 function join(ws,room,name){
   const id=randomUUID();const p={id,name:clean(name),ws,x:0,y:4,z:0,yaw:0,pitch:0};
   room.players.set(id,p);ws.room=room;ws.playerId=id;
-  send(ws,{type:'joined',code:room.code,roomName:room.name,self:id,players:snapshot(room),maxPlayers:MAX_PLAYERS});
+  send(ws,{type:'joined',code:room.code,roomName:room.name,self:id,players:snapshot(room),blocks:[...room.world],maxPlayers:MAX_PLAYERS});
   broadcast(room,{type:'enter',player:{id,name:p.name,x:0,y:4,z:0,yaw:0,pitch:0}},ws);
 }
 const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.isAlive){ws.terminate();continue}ws.isAlive=false;ws.ping()}},25000);
