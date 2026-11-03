@@ -33,14 +33,14 @@ wss.on('connection',ws=>{
       if(ws.room)remove(ws);
       if(rooms.size>=MAX_ROOMS){send(ws,{type:'error',message:'Lobby capacity reached. Try again later.'});return}
       let id;do{id=code()}while(rooms.has(id));
-      const room={code:id,name:clean(m.name,28),players:new Map(),world:new Map(),created:Date.now()};
-      rooms.set(id,room);join(ws,room,m.name);return;
+      const room={code:id,name:clean(m.name,28),seed:Number.isFinite(Number(m.seed))?Math.trunc(Number(m.seed)):Math.floor(Math.random()*1e9),players:new Map(),world:new Map(),created:Date.now()};
+      rooms.set(id,room);join(ws,room,m);return;
     }
     if(m.type==='join'){
       const room=rooms.get(clean(m.code,8).toUpperCase());
       if(!room){send(ws,{type:'error',message:'That lobby code was not found.'});return}
       if(room.players.size>=MAX_PLAYERS){send(ws,{type:'error',message:'This lobby is full.'});return}
-      if(ws.room)remove(ws);join(ws,room,m.name);return;
+      if(ws.room)remove(ws);join(ws,room,m);return;
     }
     if(m.type==='list'){send(ws,{type:'rooms',rooms:[...rooms.values()].map(r=>({code:r.code,name:r.name,players:r.players.size,maxPlayers:MAX_PLAYERS}))});return}
     if(!ws.room)return;
@@ -66,11 +66,11 @@ wss.on('connection',ws=>{
   });
   ws.on('close',()=>remove(ws));ws.on('error',()=>remove(ws));
 });
-function join(ws,room,name){
-  const id=randomUUID();const p={id,name:clean(name),ws,x:0,y:4,z:0,yaw:0,pitch:0};
+function join(ws,room,m){
+  const id=randomUUID();const num=(v,d)=>Number.isFinite(Number(v))?Math.max(-10000,Math.min(10000,Number(v))):d;const p={id,name:clean(m?.name),ws,x:num(m?.x,0),y:num(m?.y,4),z:num(m?.z,0),yaw:num(m?.yaw,0),pitch:num(m?.pitch,0)};
   room.players.set(id,p);ws.room=room;ws.playerId=id;
-  send(ws,{type:'joined',code:room.code,roomName:room.name,self:id,players:snapshot(room),blocks:[...room.world],maxPlayers:MAX_PLAYERS});
-  broadcast(room,{type:'enter',player:{id,name:p.name,x:0,y:4,z:0,yaw:0,pitch:0}},ws);
+  send(ws,{type:'joined',code:room.code,roomName:room.name,self:id,players:snapshot(room),blocks:[...room.world],seed:room.seed,maxPlayers:MAX_PLAYERS});
+  broadcast(room,{type:'enter',player:{id,name:p.name,x:p.x,y:p.y,z:p.z,yaw:p.yaw,pitch:p.pitch}},ws);
 }
 const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.isAlive){ws.terminate();continue}ws.isAlive=false;ws.ping()}},25000);
 server.listen(PORT,'0.0.0.0',()=>console.log('Voxel Realms listening on '+PORT));
