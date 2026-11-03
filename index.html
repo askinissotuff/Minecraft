@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#202b36"><title>Blockcraft — Voxel Survival</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#202b36"><title>Voxel Realms — Build, Explore, Survive</title>
 <style>
 :root{--panel:#c6c6c6;--edge:#373737;--shadow:#202020;--green:#526f35;--blue:#3b6c91}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#83bce8;font-family:Arial,Helvetica,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none}canvas{display:block;touch-action:none;image-rendering:pixelated}button{font:inherit;color:#fff;cursor:pointer;touch-action:manipulation}
@@ -41,8 +41,8 @@
 #breakmeter{position:absolute;left:50%;top:calc(50% + 22px);transform:translateX(-50%);width:48px;height:5px;background:#222;display:none}#breakfill{height:100%;width:0;background:#fff}
 @media(pointer:coarse),(max-width:800px){#mobile{display:block}#pause{display:block}#topline{right:54px}#gametitle{display:block;font-size:10px}#health{font-size:16px}}
 @media(max-width:380px){#stick{width:100px;height:100px;left:12px}#nub{left:24px;top:24px}#touchbuttons{right:6px;transform:scale(.9);transform-origin:bottom right}#hotbar{max-width:100vw}}
-</style></head><body>
-<div id="hud"><div id="topline"><span id="gametitle">BLOCKCRAFT</span><span id="health">♥♥♥♥♥♥♥♥♥♥</span></div><div id="crosshair">+</div><div id="breakmeter"><div id="breakfill"></div></div><div id="hotbar"></div></div>
+@media(pointer:coarse){#pause{display:block}}\n#netpanel input,#netpanel button{font:700 14px Arial;border:2px solid #333;border-radius:0}#netpanel button{color:#fff;box-shadow:inset 0 0 0 1px #ffffff55}#netroom{padding:8px;background:#aaa;margin:8px 0}#netroom button{padding:6px;margin-left:6px;background:#526f35}\n</style></head><body>
+<div id="hud"><div id="topline"><span id="gametitle">VOXEL REALMS</span><span id="health">♥♥♥♥♥♥♥♥♥♥</span></div><div id="crosshair">+</div><div id="breakmeter"><div id="breakfill"></div></div><div id="hotbar"></div></div>
 <div id="mobile"><div id="stick"><div id="nub"></div></div><div id="lookhint">DRAG TO LOOK</div><div id="touchbuttons"><button id="jump" aria-label="Jump">⬆</button><button id="sneak" aria-label="Sneak">⬇</button><button id="mine" aria-label="Mine">⛏</button><button id="place" aria-label="Place block">▣</button><button id="inventoryBtn" aria-label="Inventory">▦</button></div></div>
 <button id="pause" aria-label="Pause">Ⅱ</button>
 <div id="menu"><div id="panel"><div id="logo">BLOCKCRAFT</div><div id="subtitle">BUILD · EXPLORE · SURVIVE</div><button id="play">▶ &nbsp; PLAY</button><button id="mode">MODE: SURVIVAL</button><button id="reset">＋ &nbsp; CREATE NEW WORLD</button><p>Explore a world made of blocks.<br>Left stick to move · Drag to look · Tap to mine and build.</p></div></div>
