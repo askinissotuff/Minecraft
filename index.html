@@ -23,7 +23,7 @@
 #touchbuttons #mine{right:8px;top:76px;width:62px;height:62px;font-size:25px}
 #touchbuttons #place{left:24px;bottom:0;width:54px;height:54px;font-size:23px}
 #touchbuttons #inventoryBtn{right:0;bottom:0;width:52px;height:52px;font-size:22px}
-#lookhint{position:absolute;right:12px;top:calc(36px + env(safe-area-inset-top));font-size:9px;letter-spacing:1px;background:#0006;padding:5px 7px;border:1px solid #ffffff44;border-radius:2px}
+ #lookpad{position:absolute;left:38%;right:0;top:12%;bottom:220px;pointer-events:auto;touch-action:none;background:transparent} #lookhint{position:absolute;right:12px;top:calc(36px + env(safe-area-inset-top));font-size:9px;letter-spacing:1px;background:#0006;padding:5px 7px;border:1px solid #ffffff44;border-radius:2px}
 #pause{position:fixed;top:calc(10px + env(safe-area-inset-top));right:10px;z-index:5;padding:5px 11px;display:none;pointer-events:auto;background:#2229;border:2px solid #ddd;border-radius:2px;box-shadow:0 2px #111;font-weight:900}
 #menu{position:fixed;inset:0;z-index:8;display:grid;place-items:center;background:linear-gradient(#172b3a55,#1720189c),url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80') center/cover}
 #menu.hidden{display:none}#panel{width:min(460px,92vw);padding:clamp(17px,4vw,28px);text-align:center;background:#c6c6c6;border:4px solid #373737;box-shadow:inset 0 0 0 3px #eee,0 10px 30px #0009;color:#222;text-shadow:none}
@@ -45,7 +45,7 @@
 #netpanel input,#netpanel button{font:700 14px Arial;border:2px solid #333;border-radius:0}#netpanel button{color:#fff;box-shadow:inset 0 0 0 1px #ffffff55}#netroom{padding:8px;background:#aaa;margin:8px 0}#netroom button{padding:6px;margin-left:6px;background:#526f35}
 </style></head><body>
 <div id="hud"><div id="topline"><span id="gametitle">VOXEL REALMS</span><span id="health">♥♥♥♥♥♥♥♥♥♥</span></div><div id="crosshair">+</div><div id="breakmeter"><div id="breakfill"></div></div><div id="hotbar"></div></div>
-<div id="mobile"><div id="stick"><div id="nub"></div></div><div id="lookhint">DRAG TO LOOK</div><div id="touchbuttons"><button id="jump" aria-label="Jump">⬆</button><button id="sneak" aria-label="Sneak">⬇</button><button id="mine" aria-label="Mine">⛏</button><button id="place" aria-label="Place block">▣</button><button id="inventoryBtn" aria-label="Inventory">▦</button></div></div>
+<div id="mobile"><div id="stick"><div id="nub"></div></div><div id="lookpad" aria-label="Touch and drag here to look"></div><div id="lookhint">DRAG TO LOOK</div><div id="touchbuttons"><button id="jump" aria-label="Jump">⬆</button><button id="sneak" aria-label="Sneak">⬇</button><button id="mine" aria-label="Mine">⛏</button><button id="place" aria-label="Place block">▣</button><button id="inventoryBtn" aria-label="Inventory">▦</button></div></div>
 <button id="pause" aria-label="Pause">Ⅱ</button>
 <div id="menu"><div id="panel"><div id="logo">VOXEL REALMS</div><div id="subtitle">BUILD · EXPLORE · SURVIVE</div><button id="play">▶ &nbsp; PLAY</button><button id="mode">MODE: SURVIVAL</button><button id="reset">＋ &nbsp; CREATE NEW WORLD</button><p>Explore a world made of blocks.<br>Left stick to move · Drag to look · Tap to mine and build.</p></div></div>
 <div id="inventory"><div id="invpanel"><h2>Inventory</h2><div id="invgrid"></div><h2 style="margin-top:16px">Crafting</h2><div id="craftlist"></div><button id="invclose">BACK TO GAME</button></div></div><div id="toast"></div>
