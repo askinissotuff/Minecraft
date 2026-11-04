@@ -45,6 +45,7 @@ wss.on('connection',ws=>{
     if(m.type==='list'){send(ws,{type:'rooms',rooms:[...rooms.values()].map(r=>({code:r.code,name:r.name,players:r.players.size,maxPlayers:MAX_PLAYERS}))});return}
     if(!ws.room)return;
     const room=ws.room,player=room.players.get(ws.playerId);if(!player)return;
+    if(m.type==='mobkill'){const id=clean(m.id,48);if(!/^[-0-9,]+$/.test(id))return;broadcast(room,{type:'mobkill',id},ws);return;}
     if(m.type==='block'){
       const x=Math.round(Number(m.x)),y=Math.round(Number(m.y)),z=Math.round(Number(m.z));
       const allowed=new Set(['grass','dirt','stone','sand','wood','leaves','water','bedrock','planks','coal','iron','farmland','crop','wheat']);
