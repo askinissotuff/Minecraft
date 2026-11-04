@@ -48,7 +48,7 @@ wss.on('connection',ws=>{
     if(m.type==='mobkill'){const id=clean(m.id,48);if(!/^[-0-9,]+$/.test(id))return;broadcast(room,{type:'mobkill',id},ws);return;}
     if(m.type==='block'){
       const x=Math.round(Number(m.x)),y=Math.round(Number(m.y)),z=Math.round(Number(m.z));
-      const allowed=new Set(['grass','dirt','stone','sand','wood','leaves','water','bedrock','planks','coal','iron','farmland','crop','wheat']);
+      const allowed=new Set(['grass','dirt','stone','sand','wood','leaves','water','bedrock','planks','coal','iron','furnace','crafting_table','farmland','crop','wheat']);
       if(![x,y,z].every(Number.isFinite)||Math.abs(x)>10000||Math.abs(y)>256||Math.abs(z)>10000)return;
       const block=allowed.has(m.block)?m.block:null;
       const id=x+','+y+','+z;if(block){if(room.world.size<30000||room.world.has(id))room.world.set(id,block)}else room.world.delete(id);broadcast(room,{type:'block',x,y,z,block,by:player.id});return;
