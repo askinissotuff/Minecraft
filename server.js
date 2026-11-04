@@ -16,7 +16,7 @@ const server = http.createServer((req,res) => {
   res.setHeader('Content-Type','application/json; charset=utf-8');
   if(req.method==='OPTIONS'){res.writeHead(204);return res.end();}
   if(url.pathname==='/health'){res.writeHead(200);return res.end(JSON.stringify({ok:true,service:'voxel-realms',rooms:rooms.size}));}
-  if(url.pathname==='/rooms'){res.writeHead(200);return res.end(JSON.stringify([...rooms.values()].map(r=>({code:r.code,name:r.name,players:r.players.size,maxPlayers:MAX_PLAYERS})).filter(r=>r.players>0)));}
+  if(url.pathname==='/rooms'){res.writeHead(200);return res.end(JSON.stringify([...rooms.values()].map(r=>({code:r.code,name:r.name,players:r.players.size,maxPlayers:MAX_PLAYERS})).filter(r=>r.players.size>0)));}
   res.writeHead(200);res.end(JSON.stringify({name:'Voxel Realms Network',status:'online',websocket:'/ws'}));
 });
 const wss = new WebSocketServer({server,path:'/ws',maxPayload:4096});
