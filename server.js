@@ -45,7 +45,7 @@ wss.on('connection',ws=>{
     if(m.type==='list'){send(ws,{type:'rooms',rooms:[...rooms.values()].map(r=>({code:r.code,name:r.name,players:r.players.size,maxPlayers:MAX_PLAYERS}))});return}
     if(!ws.room)return;
     const room=ws.room,player=room.players.get(ws.playerId);if(!player)return;
-    if(m.type==='mobkill'){const id=clean(m.id,48);if(!/^[-0-9,]+$/.test(id))return;broadcast(room,{type:'mobkill',id},ws);return;}
+    if(m.type==='mobstate'){if(!Array.isArray(m.mobs))return;const safe=m.mobs.slice(0,80).map(v=>({id:clean(v.id,48),x:Number(v.x),y:Number(v.y),z:Number(v.z),dir:Number(v.dir),hp:Number(v.hp)})).filter(v=>/^[-0-9,]+$/.test(v.id)&&[v.x,v.y,v.z,v.dir,v.hp].every(Number.isFinite)&&Math.abs(v.x)<10000&&Math.abs(v.y)<256&&Math.abs(v.z)<10000);broadcast(room,{type:'mobstate',mobs:safe},ws);return;}if(m.type==='mobkill'){const id=clean(m.id,48);if(!/^[-0-9,]+$/.test(id))return;broadcast(room,{type:'mobkill',id},ws);return;}
     if(m.type==='block'){
       const x=Math.round(Number(m.x)),y=Math.round(Number(m.y)),z=Math.round(Number(m.z));
       const allowed=new Set(['grass','dirt','stone','sand','wood','leaves','water','bedrock','planks','coal','iron','furnace','crafting_table','farmland','crop','wheat']);
